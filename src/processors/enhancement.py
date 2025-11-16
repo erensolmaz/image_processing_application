@@ -1,0 +1,130 @@
+"""
+Image Enhancement Module
+Görüntü İyileştirme Modülü
+"""
+
+import cv2
+import numpy as np
+from typing import Tuple, Optional
+
+
+class EnhancementProcessor:
+    """Image enhancement operations"""
+    
+    @staticmethod
+    def apply_clahe(image: np.ndarray, clip_limit: float = 2.0,
+                   tile_grid_size: Tuple[int, int] = (8, 8)) -> np.ndarray:
+        """
+        Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        
+        Args:
+            image: Input grayscale image
+            clip_limit: Contrast limiting threshold
+            tile_grid_size: Size of grid for histogram equalization
+        
+        Returns:
+            Enhanced image
+        """
+        clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+        return clahe.apply(image)
+    
+    @staticmethod
+    def histogram_equalization(image: np.ndarray) -> np.ndarray:
+        """
+        Apply histogram equalization
+        
+        Args:
+            image: Input grayscale image
+        
+        Returns:
+            Equalized image
+        """
+        return cv2.equalizeHist(image)
+    
+    @staticmethod
+    def contrast_stretch(image: np.ndarray, min_val: Optional[int] = None,
+                        max_val: Optional[int] = None) -> np.ndarray:
+        """
+        Apply contrast stretching
+        
+        Args:
+            image: Input image
+            min_val: Minimum output value (None = auto)
+            max_val: Maximum output value (None = auto)
+        
+        Returns:
+            Contrast-stretched image
+        """
+        if min_val is None or max_val is None:
+            return cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX)
+        return cv2.normalize(image, None, min_val, max_val, cv2.NORM_MINMAX)
+    
+    @staticmethod
+    def gamma_correction(image: np.ndarray, gamma: float = 1.0) -> np.ndarray:
+        """
+        Apply gamma correction
+        
+        Args:
+            image: Input image
+            gamma: Gamma value (<1 = brighter, >1 = darker)
+        
+        Returns:
+            Gamma-corrected image
+        """
+        inv_gamma = 1.0 / gamma
+        table = np.array([((i / 255.0) ** inv_gamma) * 255 
+                         for i in np.arange(0, 256)]).astype("uint8")
+        return cv2.LUT(image, table)
+    
+    @staticmethod
+    def log_transform(image: np.ndarray, c: Optional[float] = None) -> np.ndarray:
+        """
+        Apply logarithmic transformation
+        
+        Args:
+            image: Input image
+            c: Scaling constant (None = auto-calculate)
+        
+        Returns:
+            Log-transformed image
+        """
+        img_float = image.astype(np.float32)
+        if c is None:
+            c = 255 / np.log(1 + np.max(img_float))
+        log_transformed = c * np.log(1 + img_float)
+        return np.clip(log_transformed, 0, 255).astype(np.uint8)
+    
+    @staticmethod
+    def sharpen(image: np.ndarray, strength: float = 1.0) -> np.ndarray:
+        """
+        Apply sharpening filter
+        
+        Args:
+            image: Input image
+            strength: Sharpening strength
+        
+        Returns:
+            Sharpened image
+        """
+        kernel = np.array([[-1, -1, -1],
+                          [-1,  9, -1],
+                          [-1, -1, -1]]) * strength
+        kernel[1, 1] = 8 * strength + 1
+        return cv2.filter2D(image, -1, kernel)
+    
+    @staticmethod
+    def adjust_brightness_contrast(image: np.ndarray, alpha: float = 1.0,
+                                   beta: int = 0) -> np.ndarray:
+        """
+        Adjust brightness and contrast
+        
+        Args:
+            image: Input image
+            alpha: Contrast control (1.0 = no change)
+            beta: Brightness control (0 = no change)
+        
+        Returns:
+            Adjusted image
+        """
+        return cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
+
