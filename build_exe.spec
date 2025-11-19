@@ -12,7 +12,6 @@ a = Analysis(
         # 'PIL._tkinter_finder',  # Tkinter not required for PyQt5 build
         'cv2',
         'numpy',
-        'pathlib',
         'PyQt5',
     ],
     hookspath=[],
@@ -34,7 +33,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='ImageProcessingApplication',
+    name='DIP_Midterm',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -44,7 +43,7 @@ exe = EXE(
     console=False,  # GUI uygulaması için console=False
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch=None,
+    # target_arch removed - let PyInstaller detect native architecture (arm64 for Apple Silicon)
     codesign_identity=None,
     entitlements_file=None,
     icon=None,  # İsterseniz icon dosyası ekleyebilirsiniz
